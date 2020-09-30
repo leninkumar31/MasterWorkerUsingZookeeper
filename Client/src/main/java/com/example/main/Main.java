@@ -1,6 +1,7 @@
 package com.example.main;
 
 import com.example.zookeeper.Client;
+import com.example.zookeeper.TaskObject;
 import org.apache.log4j.PropertyConfigurator;
 
 /**
@@ -15,9 +16,17 @@ public class Main
         PropertyConfigurator.configure(log4jConfPath);
         Client client = new Client(args[0]);
         client.startZk();
-        String name = client.queueCommand(args[1]);
-        System.out.println("Command queued: "+name);
-        Thread.sleep(60000);
-        client.stopZk();
+        while(!client.isConnected()){
+            Thread.sleep(100);
+        }
+
+        TaskObject task1 = new TaskObject();
+        TaskObject task2 = new TaskObject();
+
+        client.submitTask("First Task", task1);
+        client.submitTask("Second Task", task2);
+
+        task1.waitUntilDone();
+        task2.waitUntilDone();
     }
 }
